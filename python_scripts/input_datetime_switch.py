@@ -130,21 +130,6 @@ if switch_ontmstp > switch_offtmstp:
         # Binary sensor input:off  mit datum von morgen      
         sens_tpl_text = sens_tpl_text + " | Off:" + neui    
         
-        # laufzeit = str(dateoff - dateon)
-        # # laufzeit = laufzeit[:-3] 
-        # # logger.warning(laufzeit[:-3] )
-        
-        # hass.states.set( laufz_shwt, laufzeit, {
-        # 'friendly_name': 'Lampe Laufzeit' 
-        # })    
-
-        
-        # if dateon < current_time < dateoff:
-        #     hass.states.set( laufz_shw, "on", { 'friendly_name': sens_tpl_text }) 
-        #     logger.warning("lampe an")
-        # else:
-        #     hass.states.set( laufz_shw, "off", { 'friendly_name': sens_tpl_text }) 
-        #     logger.warning("lampe aus")
 
     else:       
         # Einschaltzeit + Datum jetzt
@@ -181,15 +166,6 @@ else:
     # Binary sensor input:on  mit datum von heute  
     sens_tpl_text = sens_tpl_text + "6 : Error Off" 
     error = True
-
-# logger.warning(dateon)
-# logger.warning(current_time)
-# logger.warning(dateoff)
- 
-            
-
-
-
 
 if error == True:
     
