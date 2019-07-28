@@ -1,0 +1,145 @@
+homeassistant:
+#========================Customize========================#
+  customize:
+    # Add an entry for each entity that you want to overwrite.
+    sensor.glamp_1_time_minus_offset:
+      icon: mdi:lightbulb-on-outline
+    sensor.glamp_1_time:
+      icon: mdi:clock
+    sensor.glamp_1_days:
+      icon: mdi:calendar-clock
+
+
+#=========================Entitys=========================#
+input_datetime:
+  switch_on:
+    name: "Einschaltzeit:"
+    has_time: true
+    has_date: false
+    # initial: '21:30'
+  switch_off:
+    has_time: true
+    name: "Ausschaltzeit:"
+    has_date: false
+    # initial: '03:30'
+
+
+input_select:
+  glamp_1_mode:
+    name: Modus Kleine Pumpe
+    options:
+      - "OFF"
+      - "ON"
+      - "AUTO"
+    icon: mdi:target
+
+
+#=========================Sensors=========================#
+binary_sensor:
+  - platform: template
+    sensors:
+      glamp_1bool_sens:
+        friendly_name: "läuft"
+        value_template: "off"
+
+
+sensor:
+  - platform: template
+    sensors:
+      glamp_1_ontime:
+        # entity_id: input_datetime.switch_on, input_datetime.switch_off
+        friendly_name: 'Lampe Laufzeit'
+        value_template: "waiting"
+        # value_template: "{{ states('sensor.pyglamp_1_ontime') }}"
+
+
+#==========================Groups==========================#
+group:
+  glamp_1:
+    name: Pumpe Timer
+    control: hidden
+    entities:
+    - input_select.glamp_1_mode
+    - sensor.glamp_1_ontime
+    - input_datetime.switch_on
+    - input_datetime.switch_off
+    - binary_sensor.glamp_1bool_sens
+    - switch.mystrom_2
+    - sensor.mystrom_2_power
+
+
+#========================Automation========================#
+automation:
+- id: glamp_1_onzeit
+  alias: 'Update Lampen Laufzeit'
+  trigger:
+    - platform: state
+      entity_id: input_datetime.switch_on , input_datetime.switch_off , input_select.glamp_1_mode
+    - platform: time_pattern
+      minutes: '/1'
+      seconds: 00
+  action: 
+    - service_template: >-
+          {% if is_state("input_select.glamp_1_mode", "AUTO") %}
+            script.glamp1_autoscript
+          {% elif is_state("input_select.glamp_1_mode", "ON") %}
+            script.glamp1_onscript
+          {% elif is_state("input_select.glamp_1_mode", "OFF") %}
+            script.glamp1_offscript        
+          {% endif %}
+
+
+#========================Scripts========================#
+script:
+    glamp1_autoscript:
+      alias: "Glamp 1 in Auto-Modus"
+      sequence:
+        - service: python_script.lampe_date_check
+          data:
+            on_off_bool_time:
+                inputdt_on: input_datetime.switch_on
+                inputdt_off: input_datetime.switch_off
+                binsens_bool: binary_sensor.glamp_1bool_sens
+                senstpl_ontime: sensor.glamp_1_ontime
+
+    glamp1_onscript:
+      alias: "Glamp 1 in On-Modus"
+      sequence:
+        - service: python_script.set_state
+          data_template:
+            entity_id: sensor.glamp_1_ontime
+            state: "Dauernd an"
+        - service: python_script.set_state
+          data_template:
+            entity_id: binary_sensor.glamp_1bool_sens
+            friendly_name: "24h/7 Dauerbetrieb"
+        - service: python_script.set_state
+          data_template:
+            entity_id: binary_sensor.glamp_1bool_sens
+            state: "on"
+        - condition: state
+          entity_id: switch.mystrom_1
+          state: 'off'
+        - service: switch.turn_on
+          entity_id: switch.mystrom_1
+
+    glamp1_offscript:
+      alias: "Glamp 1 in Off-Modus"
+      sequence:
+        - service: python_script.set_state
+          data_template:
+            entity_id: sensor.glamp_1_ontime
+            state: "Dauernd aus"
+        - service: python_script.set_state
+          data_template:
+            entity_id: binary_sensor.glamp_1bool_sens
+            friendly_name: "Aus"
+        - service: python_script.set_state
+          data_template:
+            entity_id: binary_sensor.glamp_1bool_sens
+            state: "off"
+        - condition: state
+          entity_id: switch.mystrom_1
+          state: 'on'
+        - service: switch.turn_off
+          entity_id: switch.mystrom_1
