@@ -1,0 +1,9 @@
+- platform: mystrom
+  host: 192.168.192.30
+  name: mystrom_1
+  scan_interval: 60
+
+- platform: mystrom
+  host: 192.168.192.6
+  name: mystrom_2
+  scan_interval: 60
