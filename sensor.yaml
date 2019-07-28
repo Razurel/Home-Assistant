@@ -1,0 +1,63 @@
+
+- platform: time_date
+  display_options:
+    - 'time'
+    - 'date'
+    - 'date_time'
+    - 'date_time_iso'
+    - 'time_date'
+    - 'time_utc'
+    - 'beat'
+
+- platform: rest
+  name: mystrom_1
+  resource: http://192.168.192.30/report
+  json_attributes:
+    - power
+    - relay
+    - temperature
+  value_template: 'OK'
+
+- platform: template
+  sensors:
+    mystrom_1_temp:
+      value_template: '{{ states.sensor.mystrom_1.attributes["temperature"] | round(1)  }}'
+      device_class: temperature
+      unit_of_measurement: '°C'
+      friendly_name: "MyStrom Secker 1 Temp."
+    mystrom_1_power:
+      value_template: '{{ states.sensor.mystrom_1.attributes["power"] | round(1)  }}'
+      device_class: power
+      unit_of_measurement: 'W'
+      friendly_name: "MyStrom Secker 1 Power"
+    mystrom_1_relay:
+      value_template: '{{ states.sensor.mystrom_1.attributes["relay"] }}'
+      unit_of_measurement: 'Status'
+      friendly_name: "MyStrom Secker 1 Status"
+
+
+- platform: rest
+  name: mystrom_2
+  resource: http://192.168.192.6/report
+  json_attributes:
+    - power
+    - relay
+    - temperature
+  value_template: 'OK'
+
+- platform: template
+  sensors:
+    mystrom_2_temp:
+      value_template: '{{ states.sensor.mystrom_2.attributes["temperature"] | round(1)  }}'
+      device_class: temperature
+      unit_of_measurement: '°C'
+      friendly_name: "MyStrom Secker 2 Temp."
+    mystrom_2_power:
+      value_template: '{{ states.sensor.mystrom_2.attributes["power"] | round(1)  }}'
+      device_class: power
+      unit_of_measurement: 'W'
+      friendly_name: "MyStrom Secker 2 Power"
+    mystrom_2_relay:
+      value_template: '{{ states.sensor.mystrom_2.attributes["relay"] }}'
+      unit_of_measurement: 'Status'
+      friendly_name: "MyStrom Secker 2 Status"
